@@ -6,6 +6,9 @@ const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
 
 const axios = require("axios");
+const connectDB = require("./config/dbConfig");
+
+const authRoutes = require("./routes/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -17,6 +20,9 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Routes
+app.use("/auth", authRoutes);
+
+// Clairifai Route
 app.post("/detect-color", async (req, res) => {
   try {
     const { url } = req.body;
@@ -72,6 +78,9 @@ app.post("/detect-color", async (req, res) => {
   }
 });
 
+// Database
+connectDB();
+
 app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
+  console.log(`Server is running on port ${process.env.PORT || 3500}`);
 });
