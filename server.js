@@ -10,8 +10,6 @@ const axios = require("axios");
 const app = express();
 const PORT = process.env.PORT || 3500;
 
-// Old axios version ^1.6.8
-
 // Cors
 app.use(cors(corsOptions));
 
@@ -19,19 +17,19 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Routes
-app.post("/detect-image", async (req, res) => {
-  console.log("request received");
+app.post("/detect-color", async (req, res) => {
   try {
     const { url } = req.body;
-    console.log("url extrapulated", url);
     const PAT = process.env.CLARIFAI_PAT;
     const MODEL_ID = process.env.MODEL_ID;
     const MODEL_VERSION_ID = process.env.MODEL_VERSION;
+    const USER_ID = process.env.USER_ID;
+    const APP_ID = process.env.APP_ID;
 
     const raw = JSON.stringify({
       user_app_id: {
-        user_id: process.env.USER_ID,
-        app_id: process.env.APP_ID,
+        user_id: USER_ID,
+        app_id: APP_ID,
       },
       inputs: [
         {
@@ -58,15 +56,13 @@ app.post("/detect-image", async (req, res) => {
       requestOptions
     );
 
-    console.log(response);
+    const data = await response.text();
+    const parsedData = JSON.parse(data);
 
-    const data = await response.json();
+    const colorsArray = parsedData.outputs[0].data.colors;
 
-    console.log("data", data);
-
-    if (data.outputs && data.outputs[0] && data.outputs[0].data) {
-      const imageData = data.outputs[0].data;
-      res.json({ imageData });
+    if (colorsArray) {
+      res.json(colorsArray);
     } else {
       throw new Error("Failed to generate image");
     }
